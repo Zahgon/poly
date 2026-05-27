@@ -3,8 +3,6 @@ Package alphabet provides structs for defining biological sequence alphabets.
 */
 package alphabet
 
-import "fmt"
-
 // Alphabet is a struct that holds a list of symbols and a map of symbols to their index in the list.
 type Alphabet struct {
 	symbols  []string
@@ -18,47 +16,31 @@ type Error struct {
 
 // Error returns the error message for AlphabetError.
 func (e *Error) Error() string {
-	return e.message
+	_ = "STUB: not implemented"
+
+	// NewAlphabet creates a new alphabet from a list of symbols.
+	return ""
 }
 
-// NewAlphabet creates a new alphabet from a list of symbols.
-func NewAlphabet(symbols []string) *Alphabet {
-	encoding := make(map[interface{}]int)
-	for index, symbol := range symbols {
-		encoding[symbol] = index
-		encoding[index] = index
-	}
-	return &Alphabet{symbols, encoding}
-}
+func NewAlphabet(symbols []string) *Alphabet { _ = "STUB: not implemented"; return nil }
 
 // Encode returns the index of a symbol in the alphabet.
 func (alphabet *Alphabet) Encode(symbol interface{}) (int, error) {
-	c, ok := alphabet.encoding[symbol]
-	if !ok {
-		return 0, &Error{fmt.Sprintf("Symbol %v not in alphabet", symbol)}
-	}
-	return c, nil
+	_ = "STUB: not implemented"
+	return 0, nil
 }
 
 // Decode returns the symbol at a given index in the alphabet.
 func (alphabet *Alphabet) Decode(code interface{}) (string, error) {
-	c, ok := code.(int)
-	if !ok || c < 0 || c >= len(alphabet.symbols) {
-		return "", &Error{fmt.Sprintf("Code %v not in alphabet", code)}
-	}
-	return alphabet.symbols[c], nil
+	_ = "STUB: not implemented"
+	return "", nil
 }
 
 // Extend returns a new alphabet that is the original alphabet extended with a list of symbols.
-func (alphabet *Alphabet) Extend(symbols []string) *Alphabet {
-	extended := append(alphabet.symbols, symbols...)
-	return NewAlphabet(extended)
-}
+func (alphabet *Alphabet) Extend(symbols []string) *Alphabet { _ = "STUB: not implemented"; return nil }
 
 // Symbols returns the list of symbols in the alphabet.
-func (alphabet *Alphabet) Symbols() []string {
-	return alphabet.symbols
-}
+func (alphabet *Alphabet) Symbols() []string { _ = "STUB: not implemented"; return nil }
 
 var (
 	DNA     = NewAlphabet([]string{"A", "C", "G", "T"})

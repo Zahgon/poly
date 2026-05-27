@@ -3,10 +3,7 @@
 package uniprot
 
 import (
-	"bytes"
 	"encoding/xml"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -87,14 +84,8 @@ type CommentType struct {
 }
 
 func (t *CommentType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	type T CommentType
-	var overlay struct {
-		*T
-		OrganismsDiffer *bool `xml:"http://uniprot.org/uniprot organismsDiffer,omitempty"`
-	}
-	overlay.T = (*T)(t)
-	overlay.OrganismsDiffer = (*bool)(&overlay.T.OrganismsDiffer)
-	return d.DecodeElement(&overlay, &start)
+	_ = "STUB: not implemented"
+	return nil
 }
 
 type Component struct {
@@ -175,16 +166,8 @@ type Entry struct {
 }
 
 func (t *Entry) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	type T Entry
-	var overlay struct {
-		*T
-		Created  *xsdDate `xml:"created,attr"`
-		Modified *xsdDate `xml:"modified,attr"`
-	}
-	overlay.T = (*T)(t)
-	overlay.Created = (*xsdDate)(&overlay.T.Created)
-	overlay.Modified = (*xsdDate)(&overlay.T.Modified)
-	return d.DecodeElement(&overlay, &start)
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // Describes the type of events that cause alternative products.
@@ -249,16 +232,7 @@ type ImportedFromType struct {
 
 type IntListType []int
 
-func (x *IntListType) UnmarshalText(text []byte) error {
-	for _, v := range strings.Fields(string(text)) {
-		if i, err := strconv.Atoi(v); err != nil {
-			return err
-		} else {
-			*x = append(*x, i)
-		}
-	}
-	return nil
-}
+func (x *IntListType) UnmarshalText(text []byte) error { _ = "STUB: not implemented"; return nil }
 
 type InteractantType struct {
 	Id          string          `xml:"http://uniprot.org/uniprot id"`
@@ -353,14 +327,8 @@ type PositionType struct {
 }
 
 func (t *PositionType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	type T PositionType
-	var overlay struct {
-		*T
-		Status *Status `xml:"status,attr,omitempty"`
-	}
-	overlay.T = (*T)(t)
-	overlay.Status = (*Status)(&overlay.T.Status)
-	return d.DecodeElement(&overlay, &start)
+	_ = "STUB: not implemented"
+	return nil
 }
 
 type PropertyType struct {
@@ -435,14 +403,8 @@ type SequenceType struct {
 }
 
 func (t *SequenceType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	type T SequenceType
-	var overlay struct {
-		*T
-		Modified *xsdDate `xml:"modified,attr"`
-	}
-	overlay.T = (*T)(t)
-	overlay.Modified = (*xsdDate)(&overlay.T.Modified)
-	return d.DecodeElement(&overlay, &start)
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // Describes the source of the sequence according to the citation.
@@ -509,11 +471,9 @@ type Uniprot struct {
 
 type xsdDate time.Time
 
-func (t *xsdDate) UnmarshalText(text []byte) error {
-	return _unmarshalTime(text, (*time.Time)(t), "2006-01-02")
-}
+func (t *xsdDate) UnmarshalText(text []byte) error { _ = "STUB: not implemented"; return nil }
+
 func _unmarshalTime(text []byte, t *time.Time, format string) (err error) {
-	s := string(bytes.TrimSpace(text))
-	*t, err = time.Parse(format, s)
-	return err
+	_ = "STUB: not implemented"
+	return nil
 }

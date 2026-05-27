@@ -21,16 +21,6 @@ IMPORTANT! The targetTm in all functions is specifically for Taq polymerase.
 */
 package pcr
 
-import (
-	"errors"
-	"index/suffixarray"
-	"sort"
-	"strings"
-
-	"github.com/bebop/poly/primers"
-	"github.com/bebop/poly/transform"
-)
-
 // https://doi.org/10.1089/dna.1994.13.75
 const minimalPrimerLength int = 7
 
@@ -42,27 +32,17 @@ const designedMinimalPrimerLength int = 15
 // contain additional DNA needed for assembly, like Gibson assembly overhangs
 // or GoldenGate restriction enzyme sites.
 func DesignPrimersWithOverhangs(sequence, forwardOverhang, reverseOverhang string, targetTm float64) (string, string) {
-	sequence = strings.ToUpper(sequence)
-	forwardPrimer := sequence[0:designedMinimalPrimerLength]
-	for additionalNucleotides := 0; primers.MeltingTemp(forwardPrimer) < targetTm; additionalNucleotides++ {
-		forwardPrimer = sequence[0 : designedMinimalPrimerLength+additionalNucleotides]
-	}
-	reversePrimer := transform.ReverseComplement(sequence[len(sequence)-designedMinimalPrimerLength:])
-	for additionalNucleotides := 0; primers.MeltingTemp(reversePrimer) < targetTm; additionalNucleotides++ {
-		reversePrimer = transform.ReverseComplement(sequence[len(sequence)-(designedMinimalPrimerLength+additionalNucleotides):])
-	}
-
-	// Add overhangs to primer
-	forwardPrimer = forwardOverhang + forwardPrimer
-	reversePrimer = transform.ReverseComplement(reverseOverhang) + reversePrimer
-
-	return forwardPrimer, reversePrimer
+	_ = "STUB: not implemented"
+	return "", ""
 }
+
+// Add overhangs to primer
 
 // DesignPrimers designs two primers to amplify a target sequence and only that
 // target sequence (no overhangs).
 func DesignPrimers(sequence string, targetTm float64) (string, string) {
-	return DesignPrimersWithOverhangs(sequence, "", "", targetTm)
+	_ = "STUB: not implemented"
+	return "", ""
 }
 
 // SimulateSimple simulates a PCR reaction. It takes in a list of sequences and
@@ -72,97 +52,33 @@ func DesignPrimers(sequence string, targetTm float64) (string, string) {
 // your reactions. The variable `circular` is for if the target template is
 // circular, like a plasmid.
 func SimulateSimple(sequences []string, targetTm float64, circular bool, primerList []string) []string {
+	_ = "STUB: not implemented"
 	// Set all primers to uppercase.
-	for primerIndex := range primerList {
-		primerList[primerIndex] = strings.ToUpper(primerList[primerIndex])
-	}
-
-	var pcrFragments []string
-	for _, sequence := range sequences {
-		sequence = strings.ToUpper(sequence)
-		// Suffix array construction allows function to operate on
-		// very large sequences without being worried about exeuction
-		// time. For small sequences, it doesn't really matter.
-		// https://eli.thegreenplace.net/2016/suffix-arrays-in-the-go-standard-library/
-		sequenceIndex := suffixarray.New([]byte(sequence))
-
-		primerLength := len(primerList)
-
-		forwardLocations := make(map[int][]int)
-		reverseLocations := make(map[int][]int)
-		minimalPrimers := make([]string, primerLength)
-		for primerIndex, primer := range primerList {
-			var minimalLength int
-			for index := minimalPrimerLength; primers.MeltingTemp(primer[len(primer)-index:]) < targetTm; index++ {
-				minimalLength = index
-				if primer[len(primer)-index:] == primer {
-					break
-				}
-			}
-			// Use the minimal binding sites of the primer to find positions in the template
-			minimalPrimer := primer[len(primer)-minimalLength:]
-			if minimalPrimer != primer {
-				minimalPrimers[primerIndex] = minimalPrimer
-				// For each primer, we want to look for all possible binding sites in our gene.
-				// We then append this to a list of binding sites for that primer.
-				for _, forwardLocation := range sequenceIndex.Lookup([]byte(minimalPrimer), -1) {
-					forwardLocations[forwardLocation] = append(forwardLocations[forwardLocation], primerIndex)
-				}
-				for _, reverseLocation := range sequenceIndex.Lookup([]byte(transform.ReverseComplement(minimalPrimer)), -1) {
-					reverseLocations[reverseLocation] = append(reverseLocations[reverseLocation], primerIndex)
-				}
-			}
-		}
-
-		var forwardLocationInts []int
-		var reverseLocationInts []int
-		for key := range forwardLocations {
-			forwardLocationInts = append(forwardLocationInts, key)
-		}
-		for key := range reverseLocations {
-			reverseLocationInts = append(reverseLocationInts, key)
-		}
-		sort.Ints(forwardLocationInts)
-		sort.Ints(reverseLocationInts)
-
-		// Next, iterate through the forwardLocations list
-		for index, forwardLocation := range forwardLocationInts {
-			// First, make sure that this isn't the last element in forwardLocations
-			if index+1 != len(forwardLocationInts) {
-				// If this isn't the last element in forwardLocations, then we can select the first reverseLocation that is less than the next forwardLocation
-				for _, reverseLocation := range reverseLocationInts {
-					if (forwardLocation < reverseLocation) && (reverseLocation < forwardLocationInts[index+1]) {
-						// If both are true, we have found the sequence we are aiming to PCR! Now, we get all primers from that forwardLocation and then
-						// build PCR fragments with each one.
-						pcrFragments = append(pcrFragments, generatePcrFragments(sequence, forwardLocation, reverseLocation, forwardLocations[forwardLocation], reverseLocations[reverseLocation], minimalPrimers, primerList)...)
-						break
-					}
-				}
-			} else {
-				foundFragment := false
-				for _, reverseLocation := range reverseLocationInts {
-					if forwardLocation < reverseLocation {
-						pcrFragments = append(pcrFragments, generatePcrFragments(sequence, forwardLocation, reverseLocation, forwardLocations[forwardLocation], reverseLocations[reverseLocation], minimalPrimers, primerList)...)
-						foundFragment = true
-					}
-				}
-				// If the sequence is circular and we haven't found a fragment yet, check the other side of the origin
-				if circular && !foundFragment {
-					for _, reverseLocation := range reverseLocationInts {
-						if forwardLocationInts[0] > reverseLocation {
-							// If either one of these are true, create a new pcrFragment and append to pcrFragments
-							rotatedSequence := sequence[forwardLocation:] + sequence[:forwardLocation]
-							rotatedForwardLocation := 0
-							rotatedReverseLocation := len(sequence[forwardLocation:]) + reverseLocation
-							pcrFragments = append(pcrFragments, generatePcrFragments(rotatedSequence, rotatedForwardLocation, rotatedReverseLocation, forwardLocations[forwardLocation], reverseLocations[reverseLocation], minimalPrimers, primerList)...)
-						}
-					}
-				}
-			}
-		}
-	}
-	return pcrFragments
+	return nil
 }
+
+// Suffix array construction allows function to operate on
+// very large sequences without being worried about exeuction
+// time. For small sequences, it doesn't really matter.
+// https://eli.thegreenplace.net/2016/suffix-arrays-in-the-go-standard-library/
+
+// Use the minimal binding sites of the primer to find positions in the template
+
+// For each primer, we want to look for all possible binding sites in our gene.
+// We then append this to a list of binding sites for that primer.
+
+// Next, iterate through the forwardLocations list
+
+// First, make sure that this isn't the last element in forwardLocations
+
+// If this isn't the last element in forwardLocations, then we can select the first reverseLocation that is less than the next forwardLocation
+
+// If both are true, we have found the sequence we are aiming to PCR! Now, we get all primers from that forwardLocation and then
+// build PCR fragments with each one.
+
+// If the sequence is circular and we haven't found a fragment yet, check the other side of the origin
+
+// If either one of these are true, create a new pcrFragment and append to pcrFragments
 
 // Simulate simulates a PCR reaction, including concatemerization analysis. It
 // takes in a list of sequences and list of primers, produces all possible PCR
@@ -171,30 +87,12 @@ func SimulateSimple(sequences []string, targetTm float64, circular bool, primerL
 // in your reaction, which can lead to confusing results. The variable
 // `circular` is for if the target template is circular, like a plasmid.
 func Simulate(sequences []string, targetTm float64, circular bool, primerList []string) ([]string, error) {
+	_ = "STUB: not implemented"
 	// make sure no primers are too short
-	for _, primer := range primerList {
-		if len(primer) < minimalPrimerLength {
-			return nil, errors.New("Primers are too short.")
-		}
-	}
-	initialAmplification := SimulateSimple(sequences, targetTm, circular, primerList)
-	subsequentAmplification := SimulateSimple(sequences, targetTm, circular, append(primerList, initialAmplification...))
-	if len(initialAmplification) != len(subsequentAmplification) {
-		return initialAmplification, errors.New("Concatemerization detected in PCR.")
-	}
-	return initialAmplification, nil
+	return nil, nil
 }
 
 func generatePcrFragments(sequence string, forwardLocation int, reverseLocation int, forwardPrimerIndxs []int, reversePrimerIndxs []int, minimalPrimers []string, primerList []string) []string {
-	var pcrFragments []string
-	for _, forwardPrimerIndex := range forwardPrimerIndxs {
-		minimalPrimer := minimalPrimers[forwardPrimerIndex]
-		fullPrimerForward := primerList[forwardPrimerIndex]
-		for _, reversePrimerIndex := range reversePrimerIndxs {
-			fullPrimerReverse := transform.ReverseComplement(primerList[reversePrimerIndex])
-			pcrFragment := fullPrimerForward[:len(fullPrimerForward)-len(minimalPrimer)] + sequence[forwardLocation:reverseLocation] + fullPrimerReverse
-			pcrFragments = append(pcrFragments, pcrFragment)
-		}
-	}
-	return pcrFragments
+	_ = "STUB: not implemented"
+	return nil
 }

@@ -7,13 +7,10 @@ approach the 1.0 release.
 package polyjson
 
 import (
-	"bytes"
 	"encoding/json"
 	"io"
 	"os"
 	"time"
-
-	"github.com/bebop/poly/transform"
 )
 
 /******************************************************************************
@@ -71,87 +68,31 @@ type Location struct {
 }
 
 // AddFeature adds a feature to a Poly struct. Does not add the feature's sequence
-func (sequence *Poly) AddFeature(feature *Feature) error {
-	feature.ParentSequence = sequence
-	sequence.Features = append(sequence.Features, *feature)
-	return nil
-}
+func (sequence *Poly) AddFeature(feature *Feature) error { _ = "STUB: not implemented"; return nil }
 
 // GetSequence takes a feature and returns a sequence string for that feature.
-func (feature Feature) GetSequence() (string, error) {
-	return getFeatureSequence(feature, feature.Location)
-}
+func (feature Feature) GetSequence() (string, error) { _ = "STUB: not implemented"; return "", nil }
 
 // getFeatureSequence takes a feature and location object and returns a sequence string.
 func getFeatureSequence(feature Feature, location Location) (string, error) {
-	var sequenceBuffer bytes.Buffer
-	var sequenceString string
-	parentSequence := feature.ParentSequence.Sequence
-
-	if len(location.SubLocations) == 0 {
-		sequenceBuffer.WriteString(parentSequence[location.Start:location.End])
-	} else {
-		for _, subLocation := range location.SubLocations {
-			sequence, err := getFeatureSequence(feature, subLocation)
-			if err != nil { // todo: test error
-				return "", err
-			}
-			sequenceBuffer.WriteString(sequence)
-		}
-	}
-
-	// reverse complements resulting string if needed.
-	if location.Complement {
-		sequenceString = transform.ReverseComplement(sequenceBuffer.String())
-	} else {
-		sequenceString = sequenceBuffer.String()
-	}
-
-	return sequenceString, nil
+	_ = "STUB: not implemented"
+	return "", nil
 }
+
+// todo: test error
+
+// reverse complements resulting string if needed.
 
 // Parse parses a Poly JSON file and adds appropriate pointers to struct.
-func Parse(file io.Reader) (Poly, error) {
-	var sequence Poly
-	buf := new(bytes.Buffer)
-	_, err := buf.ReadFrom(file) // todo: test error
-	if err != nil {
-		return sequence, err
-	}
+func Parse(file io.Reader) (Poly, error) { _ = "STUB: not implemented"; return *new(Poly), nil }
 
-	if err := unmarshalFn(buf.Bytes(), &sequence); err != nil {
-		return sequence, err
-	}
-
-	legacyFeatures := sequence.Features
-	sequence.Features = []Feature{}
-
-	for _, feature := range legacyFeatures {
-		err = sequence.AddFeature(&feature)
-		if err != nil {
-			return sequence, err
-		}
-	}
-	return sequence, nil
-}
+// todo: test error
 
 // Read reads a Poly JSON file.
-func Read(path string) (Poly, error) {
-	file, err := readFileFn(path)
-	if err != nil {
-		return Poly{}, err
-	}
-	return Parse(file)
-}
+func Read(path string) (Poly, error) { _ = "STUB: not implemented"; return *new(Poly), nil }
 
 // Write writes a Poly struct out to json.
-func Write(sequence Poly, path string) error {
-	file, err := marshalIndentFn(sequence, "", " ")
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(path, file, 0644)
-}
+func Write(sequence Poly, path string) error { _ = "STUB: not implemented"; return nil }
 
 /******************************************************************************
 

@@ -55,16 +55,6 @@ currently available.
 */
 package seqhash
 
-import (
-	"encoding/hex"
-	"errors"
-	"sort"
-	"strings"
-
-	"github.com/bebop/poly/transform"
-	"lukechampine.com/blake3"
-)
-
 // Seqhash is a struct that contains the Seqhash algorithm sequence types.
 type SequenceType string
 
@@ -76,149 +66,72 @@ const (
 
 // boothLeastRotation gets the least rotation of a circular string.
 func boothLeastRotation(sequence string) int {
+	_ = "STUB: not implemented"
 	// https://en.wikipedia.org/wiki/Lexicographically_minimal_string_rotation
 	// this is generally over commented but I'm keeping it this way for now. - Tim
-
-	// first concatenate the sequence to itself to avoid modular arithmetic
-	sequence += sequence // maybe do this as a buffer just for speed? May get annoying with larger sequences.
-	leastRotationIndex := 0
-
-	//initializing failure slice.
-	failureSlice := make([]int, len(sequence))
-	for i := range failureSlice {
-		failureSlice[i] = -1
-	}
-	// iterate through each character in the doubled over sequence
-	for characterIndex := 1; characterIndex < len(sequence); characterIndex++ {
-		// get character
-		character := sequence[characterIndex]
-		// get failure
-		failure := failureSlice[characterIndex-leastRotationIndex-1]
-		// while failure does not equal -1 and character does not equal the character found at the least rotation + failure + 1 <- why this?
-		for failure != -1 && character != sequence[leastRotationIndex+failure+1] {
-			// if character is lexically less than whatever is at the leastRotationIndex index update leastRotation index
-			if character < sequence[leastRotationIndex+failure+1] {
-				leastRotationIndex = characterIndex - failure - 1
-			}
-			// update failure using previous failure as index?
-			failure = failureSlice[failure]
-		}
-
-		// if character does not equal whatever character is at leastRotationIndex plus failure.
-		if character != sequence[leastRotationIndex+failure+1] {
-			// if character is lexically less then what is rotated least leastRotationIndex gets value of character index.
-			if character < sequence[leastRotationIndex] {
-				leastRotationIndex = characterIndex
-			}
-			// assign -1 to whatever is at the index of difference between character and rotation indices.
-			failureSlice[characterIndex-leastRotationIndex] = -1
-
-			// if character does equal whatever character is at leastRotationIndex plus failure.
-		} else {
-			// assign failure + 1 at the index of difference between character and rotation indices.
-			failureSlice[characterIndex-leastRotationIndex] = failure + 1
-		}
-	} // end loop
-
-	return leastRotationIndex
+	return 0
 }
+
+// first concatenate the sequence to itself to avoid modular arithmetic
+// maybe do this as a buffer just for speed? May get annoying with larger sequences.
+
+//initializing failure slice.
+
+// iterate through each character in the doubled over sequence
+
+// get character
+
+// get failure
+
+// while failure does not equal -1 and character does not equal the character found at the least rotation + failure + 1 <- why this?
+
+// if character is lexically less than whatever is at the leastRotationIndex index update leastRotation index
+
+// update failure using previous failure as index?
+
+// if character does not equal whatever character is at leastRotationIndex plus failure.
+
+// if character is lexically less then what is rotated least leastRotationIndex gets value of character index.
+
+// assign -1 to whatever is at the index of difference between character and rotation indices.
+
+// if character does equal whatever character is at leastRotationIndex plus failure.
+
+// assign failure + 1 at the index of difference between character and rotation indices.
+
+// end loop
 
 // RotateSequence rotates circular sequences to deterministic point.
-func RotateSequence(sequence string) string {
-	rotationIndex := boothLeastRotation(sequence)
-	var sequenceBuilder strings.Builder
+func RotateSequence(sequence string) string { _ = "STUB: not implemented"; return "" }
 
-	// writing the same sequence twice. using build incase of very long circular genome.
-	sequenceBuilder.WriteString(sequence)
-	sequenceBuilder.WriteString(sequence)
-
-	concatenatedSequence := sequenceBuilder.String()
-	sequence = concatenatedSequence[rotationIndex : rotationIndex+len(sequence)]
-	return sequence
-}
+// writing the same sequence twice. using build incase of very long circular genome.
 
 // Hash is a function to create Seqhashes, a specific kind of identifier.
 func Hash(sequence string, sequenceType SequenceType, circular bool, doubleStranded bool) (string, error) {
+	_ = "STUB: not implemented"
 	// By definition, Seqhashes are of uppercase sequences
-	sequence = strings.ToUpper(sequence)
-	// If RNA, convert to a DNA sequence. The hash itself between a DNA and RNA sequence will not
-	// be different, but their Seqhash will have a different metadata string (R vs D)
-	if sequenceType == SequenceType("RNA") {
-		sequence = strings.ReplaceAll(sequence, "U", "T")
-	}
-
-	// Run checks on the input
-	if sequenceType != DNA && sequenceType != RNA && sequenceType != PROTEIN {
-		return "", errors.New("Only sequenceTypes of DNA, RNA, or PROTEIN allowed. Got sequenceType: " + string(sequenceType))
-	}
-	if sequenceType == DNA || sequenceType == RNA {
-		for _, char := range sequence {
-			if !strings.Contains("ATUGCYRSWKMBDHVNZ", string(char)) {
-				return "", errors.New("Only letters ATUGCYRSWKMBDHVNZ are allowed for DNA/RNA. Got letter: " + string(char))
-			}
-		}
-	}
-	if sequenceType == PROTEIN {
-		for _, char := range sequence {
-			// Selenocysteine (Sec; U) and pyrrolysine (Pyl; O) are added
-			// in accordance with https://www.uniprot.org/help/sequences
-			// The release notes https://web.expasy.org/docs/relnotes/relstat.html
-			// also state there are Asx (B), Glx (Z), and Xaa (X) amino acids, so
-			// these are added in as well.
-			if !strings.Contains("ACDEFGHIKLMNPQRSTVWYUO*BXZ", string(char)) {
-				return "", errors.New("Only letters ACDEFGHIKLMNPQRSTVWYUO*BXZ are allowed for Proteins. Got letter: " + string(char))
-			}
-		}
-	}
-	// There is no check for circular proteins since proteins can be circular
-	if sequenceType == PROTEIN && doubleStranded {
-		return "", errors.New("Proteins cannot be double stranded")
-	}
-
-	// Gets Deterministic sequence based off of metadata + sequence
-	var deterministicSequence string
-	switch {
-	case circular && doubleStranded:
-		potentialSequences := []string{RotateSequence(sequence), RotateSequence(transform.ReverseComplement(sequence))}
-		sort.Strings(potentialSequences)
-		deterministicSequence = potentialSequences[0]
-	case circular && !doubleStranded:
-		deterministicSequence = RotateSequence(sequence)
-	case !circular && doubleStranded:
-		potentialSequences := []string{sequence, transform.ReverseComplement(sequence)}
-		sort.Strings(potentialSequences)
-		deterministicSequence = potentialSequences[0]
-	case !circular && !doubleStranded:
-		deterministicSequence = sequence
-	}
-
-	// Build 3 letter metadata
-	var sequenceTypeLetter string
-	var circularLetter string
-	var doubleStrandedLetter string
-	// Get first letter. D for DNA, R for RNA, and P for Protein
-	switch sequenceType {
-	case DNA:
-		sequenceTypeLetter = "D"
-	case RNA:
-		sequenceTypeLetter = "R"
-	case PROTEIN:
-		sequenceTypeLetter = "P"
-	}
-	// Get 2nd letter. C for circular, L for Linear
-	if circular {
-		circularLetter = "C"
-	} else {
-		circularLetter = "L"
-	}
-	// Get 3rd letter. D for Double stranded, S for Single stranded
-	if doubleStranded {
-		doubleStrandedLetter = "D"
-	} else {
-		doubleStrandedLetter = "S"
-	}
-
-	newhash := blake3.Sum256([]byte(deterministicSequence))
-	seqhash := "v1" + "_" + sequenceTypeLetter + circularLetter + doubleStrandedLetter + "_" + hex.EncodeToString(newhash[:])
-	return seqhash, nil
+	return "", nil
 }
+
+// If RNA, convert to a DNA sequence. The hash itself between a DNA and RNA sequence will not
+// be different, but their Seqhash will have a different metadata string (R vs D)
+
+// Run checks on the input
+
+// Selenocysteine (Sec; U) and pyrrolysine (Pyl; O) are added
+// in accordance with https://www.uniprot.org/help/sequences
+// The release notes https://web.expasy.org/docs/relnotes/relstat.html
+// also state there are Asx (B), Glx (Z), and Xaa (X) amino acids, so
+// these are added in as well.
+
+// There is no check for circular proteins since proteins can be circular
+
+// Gets Deterministic sequence based off of metadata + sequence
+
+// Build 3 letter metadata
+
+// Get first letter. D for DNA, R for RNA, and P for Protein
+
+// Get 2nd letter. C for circular, L for Linear
+
+// Get 3rd letter. D for Double stranded, S for Single stranded

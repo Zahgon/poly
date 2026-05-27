@@ -35,15 +35,7 @@ package pileup
 
 import (
 	"bufio"
-	"bytes"
-	"errors"
-	"fmt"
 	"io"
-	"math"
-	"os"
-	"strconv"
-	"strings"
-	"unicode"
 )
 
 // https://en.wikipedia.org/wiki/Pileup_format
@@ -62,10 +54,9 @@ type Pileup struct {
 
 // Parse parses a given Pileup file into an array of Pileup structs.
 func Parse(r io.Reader) ([]Pileup, error) {
+	_ = "STUB: not implemented"
 	// 32kB is a magic number often used by the Go stdlib for parsing. We multiply it by two.
-	const maxLineSize = 2 * 32 * 1024
-	parser := NewParser(r, maxLineSize)
-	return parser.ParseAll()
+	return nil, nil
 }
 
 // Parser is a pileup parser.
@@ -75,129 +66,52 @@ type Parser struct {
 }
 
 // NewParser creates a parser from an io.Reader for pileup data.
-func NewParser(r io.Reader, maxLineSize int) *Parser {
-	return &Parser{
-		reader: *bufio.NewReaderSize(r, maxLineSize),
-	}
-}
+func NewParser(r io.Reader, maxLineSize int) *Parser { _ = "STUB: not implemented"; return nil }
 
 // ParseAll parses all sequences in underlying reader only returning non-EOF errors.
 // It returns all valid pileup sequences up to error if encountered.
-func (parser *Parser) ParseAll() ([]Pileup, error) {
-	return parser.ParseN(math.MaxInt)
-}
+func (parser *Parser) ParseAll() ([]Pileup, error) { _ = "STUB: not implemented"; return nil, nil }
 
 // ParseN parses up to maxRows pileup sequences from the Parser's underlying reader.
 // ParseN does not return EOF if encountered.
 // If an non-EOF error is encountered it returns it and all correctly parsed sequences up to then.
 func (parser *Parser) ParseN(maxRows int) (pileups []Pileup, err error) {
-	for counter := 0; counter < maxRows; counter++ {
-		pileup, err := parser.ParseNext()
-		if err != nil {
-			if errors.Is(err, io.EOF) {
-				err = nil // EOF not treated as parsing error.
-			}
-			return pileups, err
-		}
-		pileups = append(pileups, pileup)
-	}
-	return pileups, nil
+	_ = "STUB: not implemented"
+	return nil, nil
 }
+
+// EOF not treated as parsing error.
 
 // ParseNext parses the next pileup row in a pileup file.
 // ParseNext returns an EOF if encountered.
 func (parser *Parser) ParseNext() (Pileup, error) {
-	if _, err := parser.reader.Peek(1); err != nil {
-		// Early return on error. Probably will be EOF.
-		return Pileup{}, err
-	}
-	// Parse out a single line
-	lineBytes, err := parser.reader.ReadSlice('\n')
-	if err != nil {
-		return Pileup{}, err
-	}
-	parser.line++
-	line := string(lineBytes)
-	line = line[:len(line)-1] // Exclude newline delimiter.
-
-	// Check that there are 6 values, as defined by the pileup format
-	values := strings.Split(line, "\t")
-	if len(values) != 6 {
-		return Pileup{}, fmt.Errorf("Error on line %d: Got %d values, expected 6.", parser.line, len(values))
-	}
-
-	// Convert Position and ReadCount to integers
-	positionInteger, err := strconv.Atoi(values[1])
-	if err != nil {
-		return Pileup{}, fmt.Errorf("Error on line %d. Got error: %w", parser.line, err)
-	}
-	readCountInteger, err := strconv.Atoi(values[3])
-	if err != nil {
-		return Pileup{}, fmt.Errorf("Error on line %d. Got error: %w", parser.line, err)
-	}
-
-	// Parse ReadResults
-	var readResults []string
-	var starts uint
-	var ends uint
-	var skip int
-	var readCount uint
-	resultsString := values[4]
-	for resultIndex := range resultsString {
-		if skip != 0 {
-			skip = skip - 1
-			continue
-		}
-		resultRune := resultsString[resultIndex]
-		switch resultRune {
-		case '^':
-			starts = starts + 1
-			skip = skip + 2
-			readResults = append(readResults, resultsString[resultIndex:resultIndex+3])
-		case '$':
-			ends = ends + 1
-			// This applies to the last read segement
-			readResults[len(readResults)-1] = readResults[len(readResults)-1] + "$"
-		case '.', ',', '*', 'A', 'T', 'G', 'C', 'N', 'a', 't', 'g', 'c', 'n':
-			readResults = append(readResults, string(resultRune))
-		case '-', '+':
-			// formatted in `+4ATGC` format. We need to know the number of jumps
-			// because you can have +10AAAAAAAAAA
-			var numberOfJumps string
-			for numberIndex := range resultsString[resultIndex:] {
-				runeToCheck := resultsString[resultIndex+numberIndex+1]
-				if unicode.IsDigit(rune(runeToCheck)) {
-					numberOfJumps = numberOfJumps + string(runeToCheck)
-					continue
-				}
-				break
-			}
-			regularExpressionInt, _ := strconv.Atoi(numberOfJumps) // Because of the above check, this will never err
-			readResult := resultsString[resultIndex : resultIndex+regularExpressionInt+2]
-			for _, letter := range readResult {
-				switch letter {
-				case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'T', 'G', 'C', 'N', 'a', 't', 'g', 'c', 'n', '-', '+':
-					continue
-				default:
-					return Pileup{}, fmt.Errorf("Rune within +,- not found on line %d. Got %c: only runes allowed are: [0 1 2 3 4 5 6 7 8 9 A T G C N a t g c n - +]", parser.line, letter)
-				}
-			}
-			readResults = append(readResults, readResult)
-			skip = skip + regularExpressionInt + len(numberOfJumps) // The 1 makes sure to include the regularExpressionInt in readResult string
-		default:
-			return Pileup{}, fmt.Errorf("Rune not found on line %d. Got %c: only runes allowed are: [^ $ . , * A T G C N a t g c n - +]", parser.line, resultRune)
-		}
-		readCount = readCount + 1
-	}
-
-	return Pileup{Sequence: values[0], Position: uint(positionInteger), ReferenceBase: values[2], ReadCount: uint(readCountInteger), ReadResults: readResults, Quality: values[5]}, nil
+	_ = "STUB: not implemented"
+	return *new(Pileup), nil
 }
+
+// Early return on error. Probably will be EOF.
+
+// Parse out a single line
+
+// Exclude newline delimiter.
+
+// Check that there are 6 values, as defined by the pileup format
+
+// Convert Position and ReadCount to integers
+
+// Parse ReadResults
+
+// This applies to the last read segement
+
+// formatted in `+4ATGC` format. We need to know the number of jumps
+// because you can have +10AAAAAAAAAA
+
+// Because of the above check, this will never err
+
+// The 1 makes sure to include the regularExpressionInt in readResult string
 
 // Reset discards all data in buffer and resets state.
-func (parser *Parser) Reset(r io.Reader) {
-	parser.reader.Reset(r)
-	parser.line = 0
-}
+func (parser *Parser) Reset(r io.Reader) { _ = "STUB: not implemented"; return }
 
 /******************************************************************************
 
@@ -206,14 +120,7 @@ Start of  Read functions
 ******************************************************************************/
 
 // Read reads a  file into an array of Pileup structs
-func Read(path string) ([]Pileup, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	return Parse(file)
-}
+func Read(path string) ([]Pileup, error) { _ = "STUB: not implemented"; return nil, nil }
 
 /******************************************************************************
 
@@ -222,31 +129,7 @@ Start of  Write functions
 ******************************************************************************/
 
 // WritePileups writes a pileup array to an io.Writer
-func WritePileups(pileups []Pileup, w io.Writer) error {
-	for _, pileup := range pileups {
-		_, err := w.Write([]byte(
-			strings.Join(
-				[]string{
-					pileup.Sequence,
-					strconv.FormatUint(uint64(pileup.Position), 10),
-					pileup.ReferenceBase,
-					strconv.FormatUint(uint64(pileup.ReadCount), 10),
-					strings.Join(pileup.ReadResults, ""),
-					pileup.Quality,
-				},
-				"\t") + "\n"))
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
+func WritePileups(pileups []Pileup, w io.Writer) error { _ = "STUB: not implemented"; return nil }
 
 // Write writes a pileup array to a file
-func Write(pileups []Pileup, path string) error {
-	var b bytes.Buffer
-	if err := WritePileups(pileups, &b); err != nil {
-		return err
-	}
-	return os.WriteFile(path, b.Bytes(), 0644)
-}
+func Write(pileups []Pileup, path string) error { _ = "STUB: not implemented"; return nil }

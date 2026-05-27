@@ -42,11 +42,7 @@ Tim
 */
 package mash
 
-import (
-	"sort"
-
-	"github.com/spaolacci/murmur3"
-) // murmur3 is a fast non-cryptographic hash algorithm that was also used in the original papers-> https://github.com/shenwei356/go-hashing-kmer-bench
+// murmur3 is a fast non-cryptographic hash algorithm that was also used in the original papers-> https://github.com/shenwei356/go-hashing-kmer-bench
 
 // Mash is a collection of hashes of kmers from a given sequence.
 type Mash struct {
@@ -56,85 +52,35 @@ type Mash struct {
 }
 
 // New initializes a new mash sketch.
-func New(kmerSize int, sketchSize int) *Mash {
-	return &Mash{
-		KmerSize:   kmerSize,
-		SketchSize: sketchSize,
-		Sketches:   make([]uint32, sketchSize),
-	}
-}
+func New(kmerSize int, sketchSize int) *Mash { _ = "STUB: not implemented"; return nil }
 
 // Sketch generates a mash sketch of the sequence.
 func (mash *Mash) Sketch(sequence string) {
+	_ = "STUB: not implemented"
 	// the sketch size is the number of hashes to store. Pre-shifted to avoid off-by-one errors.
-	maxShiftedSketchSize := mash.SketchSize - 1
-
-	// slide a window of size k along the sequence
-	for kmerStart := 0; kmerStart < len(sequence)-mash.KmerSize; kmerStart++ {
-		kmer := sequence[kmerStart : kmerStart+mash.KmerSize]
-		// hash the kmer to a 32 bit number
-		hash := murmur3.Sum32([]byte(kmer))
-		// keep the minimum hash value of all the kmers in the window up to a given sketch size
-		// the sketch is a vector of the minimum hash values
-
-		// if the sketch is not full, store the hash in the sketch
-		if kmerStart < maxShiftedSketchSize {
-			mash.Sketches[kmerStart] = hash
-			continue
-		}
-
-		// if the sketch has just been filled add the hash to the sketch and sort the sketch
-		if kmerStart == maxShiftedSketchSize {
-			// sort the sketch from smallest to largest
-			mash.Sketches[maxShiftedSketchSize] = hash
-			sort.Slice(mash.Sketches, func(i, j int) bool { return mash.Sketches[i] < mash.Sketches[j] })
-			continue
-		}
-
-		// if the sketch is full and the new hash is smaller than the largest hash in the sketch,
-		// replace the largest hash with the new hash and sort the sketch if the new hash is smaller than the second largest hash in the sketch
-		if kmerStart > maxShiftedSketchSize && mash.Sketches[maxShiftedSketchSize] > hash {
-			mash.Sketches[maxShiftedSketchSize] = hash
-			if hash < mash.Sketches[maxShiftedSketchSize-1] { // if the new hash is smaller than the second largest hash in the sketch, sort the sketch
-				sort.Slice(mash.Sketches, func(i, j int) bool { return mash.Sketches[i] < mash.Sketches[j] })
-			}
-			continue
-		}
-	}
+	return
 }
+
+// slide a window of size k along the sequence
+
+// hash the kmer to a 32 bit number
+
+// keep the minimum hash value of all the kmers in the window up to a given sketch size
+// the sketch is a vector of the minimum hash values
+
+// if the sketch is not full, store the hash in the sketch
+
+// if the sketch has just been filled add the hash to the sketch and sort the sketch
+
+// sort the sketch from smallest to largest
+
+// if the sketch is full and the new hash is smaller than the largest hash in the sketch,
+// replace the largest hash with the new hash and sort the sketch if the new hash is smaller than the second largest hash in the sketch
+
+// if the new hash is smaller than the second largest hash in the sketch, sort the sketch
 
 // Similarity returns the Jaccard similarity between two sketches (number of matching hashes / sketch size)
-func (mash *Mash) Similarity(other *Mash) float64 {
-	var sameHashes int
-	largerSketch := mash
-	smallerSketch := other
-
-	if mash.SketchSize < other.SketchSize {
-		largerSketch = other
-		smallerSketch = mash
-	}
-
-	if largerSketch.Sketches[largerSketch.SketchSize-1] < smallerSketch.Sketches[0] || smallerSketch.Sketches[smallerSketch.SketchSize-1] < largerSketch.Sketches[0] {
-		return 0
-	}
-
-	smallSketchIndex, largeSketchIndex := 0, 0
-	for smallSketchIndex < smallerSketch.SketchSize && largeSketchIndex < largerSketch.SketchSize {
-		if smallerSketch.Sketches[smallSketchIndex] == largerSketch.Sketches[largeSketchIndex] {
-			sameHashes++
-			smallSketchIndex++
-			largeSketchIndex++
-		} else if smallerSketch.Sketches[smallSketchIndex] < largerSketch.Sketches[largeSketchIndex] {
-			smallSketchIndex++
-		} else {
-			largeSketchIndex++
-		}
-	}
-
-	return float64(sameHashes) / float64(smallerSketch.SketchSize)
-}
+func (mash *Mash) Similarity(other *Mash) float64 { _ = "STUB: not implemented"; return 0 }
 
 // Distance returns the Jaccard distance between two sketches (1 - similarity)
-func (mash *Mash) Distance(other *Mash) float64 {
-	return 1 - mash.Similarity(other)
-}
+func (mash *Mash) Distance(other *Mash) float64 { _ = "STUB: not implemented"; return 0 }

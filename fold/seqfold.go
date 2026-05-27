@@ -1,11 +1,7 @@
 package fold
 
 import (
-	"fmt"
 	"math"
-	"strings"
-
-	"github.com/bebop/poly/checks"
 )
 
 const (
@@ -104,21 +100,12 @@ type nucleicAcidStructure struct {
 
 // Equal returns true if two nucleicAcidStructures are equal
 func (structure nucleicAcidStructure) Equal(other nucleicAcidStructure) bool {
-	if len(structure.inner) != len(other.inner) {
-		return false
-	}
-	for i, val := range structure.inner {
-		if val != other.inner[i] {
-			return false
-		}
-	}
-	return structure.energy == other.energy
+	_ = "STUB: not implemented"
+	return false
 }
 
 // Valid returns true if the NucleicAcidStructure is valid
-func (structure nucleicAcidStructure) Valid() bool {
-	return structure.energy != math.Inf(1) && structure.energy != math.Inf(-1)
-}
+func (structure nucleicAcidStructure) Valid() bool { _ = "STUB: not implemented"; return false }
 
 // defaultStructure is the default (zero value) nucleic acid structure, it used
 // mostly to initialize the caches, see Context
@@ -146,50 +133,15 @@ type context struct {
 // newFoldingContext returns a context ready to use, in case of error
 // the returned FoldingContext is empty.
 func newFoldingContext(seq string, temp float64) (context, error) {
-	seq = strings.ToUpper(seq)
-
-	// figure out whether it's DNA or rna, choose energy map
-	var energyMap energies
-	switch {
-	case checks.IsDNA(seq):
-		energyMap = dnaEnergies
-	case checks.IsRNA(seq):
-		energyMap = rnaEnergies
-	default:
-		return context{}, fmt.Errorf("the sequence %s is not RNA or DNA", seq)
-	}
-
-	var (
-		sequenceLength = len(seq)
-		vCache         = make([][]nucleicAcidStructure, sequenceLength)
-		wCache         = make([][]nucleicAcidStructure, sequenceLength)
-		row            = make([]nucleicAcidStructure, sequenceLength)
-	)
-	for nucleicAcidIndex := 0; nucleicAcidIndex < sequenceLength; nucleicAcidIndex++ {
-		row[nucleicAcidIndex] = defaultStructure
-	}
-	for j := 0; j < sequenceLength; j++ {
-		vCache[j] = make([]nucleicAcidStructure, sequenceLength)
-		copy(vCache[j], row)
-
-		wCache[j] = make([]nucleicAcidStructure, sequenceLength)
-		copy(wCache[j], row)
-	}
-	ret := context{
-		energies:                   energyMap,
-		seq:                        seq,
-		pairedMinimumFreeEnergyV:   vCache,
-		unpairedMinimumFreeEnergyW: wCache,
-		temp:                       temp + 273.15, // kelvin
-	}
-
-	// fill the cache
-	_, err := unpairedMinimumFreeEnergyW(0, sequenceLength-1, ret)
-	if err != nil {
-		return context{}, fmt.Errorf("error filling the caches for the FoldingContext: %w", err)
-	}
-	return ret, nil
+	_ = "STUB: not implemented"
+	return *new(context), nil
 }
+
+// figure out whether it's DNA or rna, choose energy map
+
+// kelvin
+
+// fill the cache
 
 // Result holds the resulting structures of the folded s
 type Result struct {
@@ -202,46 +154,12 @@ type Result struct {
 // Dot-bracket notation, consisting in a balanced parentheses string composed
 // by a three-character alphabet {.,(,)}, that can be unambiguously converted
 // in the RNA secondary structure. See example_test.go for a small example.
-func (r Result) DotBracket() string {
-	if len(r.structs) == 0 {
-		return ""
-	}
-	lastStructEnd := 0
-	for _, structure := range r.structs {
-		for _, innerSubsequence := range structure.inner {
-			if innerSubsequence.end > lastStructEnd {
-				lastStructEnd = innerSubsequence.end
-			}
-		}
-	}
-	lastStructEnd += 1
-	result := make([]byte, lastStructEnd)
-	for i := range result {
-		result[i] = '.'
-	}
-	for _, structure := range r.structs {
-		if len(structure.inner) == 1 {
-			innerSubsequence := structure.inner[0]
-			result[innerSubsequence.start] = '('
-			result[innerSubsequence.end] = ')'
-		}
-	}
-	return string(result)
-}
+func (r Result) DotBracket() string { _ = "STUB: not implemented"; return "" }
 
 // MinimumFreeEnergy return just the delta G of the structures resulting from
 // folding a sequence.
 //
 // Returns the minimum free energy of the folded sequence
-func (r Result) MinimumFreeEnergy() float64 {
-	if len(r.structs) == 0 {
-		// invalid
-		return math.Inf(1)
-	}
+func (r Result) MinimumFreeEnergy() float64 { _ = "STUB: not implemented"; return 0 }
 
-	summedEnergy := 0.0
-	for _, structure := range r.structs {
-		summedEnergy += structure.energy
-	}
-	return summedEnergy
-}
+// invalid

@@ -21,9 +21,7 @@ from a disk into an Entry channel.
 package uniprot
 
 import (
-	"compress/gzip"
 	"encoding/xml"
-	"os"
 )
 
 /******************************************************************************
@@ -66,42 +64,14 @@ type Decoder interface {
 // gives a single error, while errors encountered while decoding the XML dump
 // are added to the errors channel.
 func Read(path string) (chan Entry, chan error, error) {
-	entries := make(chan Entry, 100) // if you don't have a buffered channel, nothing will be read in loops on the channel.
-	decoderErrors := make(chan error, 100)
-	xmlFile, err := os.Open(path)
-	if err != nil {
-		return entries, decoderErrors, err
-	}
-	unzippedBytes, err := gzip.NewReader(xmlFile)
-	if err != nil {
-		return entries, decoderErrors, err
-	}
-	decoder := xml.NewDecoder(unzippedBytes)
-	go Parse(decoder, entries, decoderErrors)
-	return entries, decoderErrors, nil
+	_ = "STUB: not implemented"
+	return nil, nil,
+		// if you don't have a buffered channel, nothing will be read in loops on the channel.
+		nil
 }
 
 // Parse parses Uniprot entries into a channel.
 func Parse(decoder Decoder, entries chan<- Entry, errors chan<- error) {
-	for {
-		decoderToken, err := decoder.Token()
-
-		if err != nil {
-			if err.Error() == "EOF" {
-				break
-			}
-			errors <- err
-		}
-		startElement, ok := decoderToken.(xml.StartElement)
-		if ok && startElement.Name.Local == "entry" {
-			var e Entry
-			err = decoder.DecodeElement(&e, &startElement)
-			if err != nil {
-				errors <- err
-			}
-			entries <- e
-		}
-	}
-	close(entries)
-	close(errors)
+	_ = "STUB: not implemented"
+	return
 }

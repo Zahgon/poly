@@ -3,8 +3,6 @@ Package transform provides functions for transforming sequences.
 */
 package transform
 
-import "unsafe"
-
 // ReverseComplement returns the reversed complement of sequence.
 // It is the equivalent of calling
 //
@@ -12,15 +10,9 @@ import "unsafe"
 //
 // This function expects byte characters in the range a-z and A-Z and
 // will not check for non-byte characters, i.e. utf-8 encoding.
-func ReverseComplement(sequence string) string {
-	sequenceLength := len(sequence)
-	newSequence := make([]byte, sequenceLength)
-	for index := 0; index < sequenceLength; index++ {
-		newSequence[index] = complementTable[sequence[sequenceLength-index-1]]
-	}
-	// This is how strings.Builder works with the String() method. If Mr. Go says it's safe...
-	return *(*string)(unsafe.Pointer(&newSequence))
-}
+func ReverseComplement(sequence string) string { _ = "STUB: not implemented"; return "" }
+
+// This is how strings.Builder works with the String() method. If Mr. Go says it's safe...
 
 // Complement returns the complement of sequence. In [DNA] each nucleotide
 // (A, T, C or G) is has a deterministic pair. A is paired with T and
@@ -36,43 +28,27 @@ func ReverseComplement(sequence string) string {
 // will not check for non-byte characters, i.e. utf-8 encoding.
 //
 // [DNA]: https://en.wikipedia.org/wiki/DNA
-func Complement(sequence string) string {
-	sequenceLength := len(sequence)
-	newSequence := make([]byte, sequenceLength)
-	for index := 0; index < sequenceLength; index++ {
-		newSequence[index] = complementTable[sequence[index]]
-	}
-	// This is how strings.Builder works with the String() method. If Mr. Go says it's safe...
-	return *(*string)(unsafe.Pointer(&newSequence))
-}
+func Complement(sequence string) string { _ = "STUB: not implemented"; return "" }
+
+// This is how strings.Builder works with the String() method. If Mr. Go says it's safe...
 
 // Reverse returns the reverse of sequence. It performs a basic
 // string reversal by working on the bytes.
 //
 // This function expects byte characters in the range a-z and A-Z and
 // will not check for non-byte character, i.e. utf-8 encoding.
-func Reverse(sequence string) string {
-	sequenceLength := len(sequence)
-	newSequence := make([]byte, sequenceLength)
-	for index := 0; index < sequenceLength; index++ {
-		newSequence[index] = sequence[sequenceLength-index-1]
-	}
-	// This is how strings.Builder works with the String() method. If Mr. Go says it's safe...
-	return *(*string)(unsafe.Pointer(&newSequence))
-}
+func Reverse(sequence string) string { _ = "STUB: not implemented"; return "" }
+
+// This is how strings.Builder works with the String() method. If Mr. Go says it's safe...
 
 // ComplementBase accepts a base pair and returns its complement base pair. See Complement.
 //
 // This function expects byte characters in the range a-z and A-Z and
 // will return a space ' ' (U+0020) for characters that are not matched
 // to any known base. This is subject to change.
-func ComplementBase(basePair rune) rune {
-	got := rune(complementTable[basePair])
-	if got == 0 {
-		return ' ' // invalid sequence returns empty space.
-	}
-	return got
-}
+func ComplementBase(basePair rune) rune { _ = "STUB: not implemented"; return 0 }
+
+// invalid sequence returns empty space.
 
 // complementTable provides 1:1 mapping between bases and their complements
 var complementTable = [256]byte{
@@ -115,15 +91,9 @@ var complementTable = [256]byte{
 //
 // This function expects byte characters in the range a-z and A-Z and
 // will not check for non-byte characters, i.e. utf-8 encoding.
-func ReverseComplementRNA(sequence string) string {
-	sequenceLength := len(sequence)
-	newSequence := make([]byte, sequenceLength)
-	for index := 0; index < sequenceLength; index++ {
-		newSequence[index] = complementTableRNA[sequence[sequenceLength-index-1]]
-	}
-	// This is how strings.Builder works with the String() method. If Mr. Go says it's safe...
-	return *(*string)(unsafe.Pointer(&newSequence))
-}
+func ReverseComplementRNA(sequence string) string { _ = "STUB: not implemented"; return "" }
+
+// This is how strings.Builder works with the String() method. If Mr. Go says it's safe...
 
 // ComplementRNA returns the complement of sequence. In [RNA] each nucleotide
 // (A, U, C or G) is has a deterministic pair. A is paired with U and
@@ -139,15 +109,9 @@ func ReverseComplementRNA(sequence string) string {
 // will not check for non-byte characters, i.e. utf-8 encoding.
 //
 // [RNA]: https://en.wikipedia.org/wiki/RNA
-func ComplementRNA(sequence string) string {
-	sequenceLength := len(sequence)
-	newSequence := make([]byte, sequenceLength)
-	for index := 0; index < sequenceLength; index++ {
-		newSequence[index] = complementTableRNA[sequence[index]]
-	}
-	// This is how strings.Builder works with the String() method. If Mr. Go says it's safe...
-	return *(*string)(unsafe.Pointer(&newSequence))
-}
+func ComplementRNA(sequence string) string { _ = "STUB: not implemented"; return "" }
+
+// This is how strings.Builder works with the String() method. If Mr. Go says it's safe...
 
 // ComplementBaseRNA accepts a RNA base pair and returns its complement base
 // pair. See Complement.
@@ -155,13 +119,9 @@ func ComplementRNA(sequence string) string {
 // This function expects byte characters in the range a-z and A-Z and
 // will return a space ' ' (U+0020) for characters that are not matched
 // to any known base. This is subject to change.
-func ComplementBaseRNA(basePair rune) rune {
-	got := rune(complementTableRNA[basePair])
-	if got == 0 {
-		return ' ' // invalid sequence returns empty space.
-	}
-	return got
-}
+func ComplementBaseRNA(basePair rune) rune { _ = "STUB: not implemented"; return 0 }
+
+// invalid sequence returns empty space.
 
 // complementTable provides 1:1 mapping between bases and their complements
 // see https://www.dnabaser.com/articles/IUPAC%20ambiguity%20codes.html

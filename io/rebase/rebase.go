@@ -145,8 +145,6 @@ package rebase
 import (
 	"encoding/json"
 	"io"
-	"os"
-	"strings"
 )
 
 var (
@@ -168,116 +166,45 @@ type Enzyme struct {
 }
 
 // Parse parses the Rebase database into a map of enzymes
-func Parse(file io.Reader) (map[string]Enzyme, error) {
-	fileBytes, err := readAllFn(file)
-	if err != nil {
-		return make(map[string]Enzyme), err
-	}
-	// Setup some variables
-	var enzyme Enzyme
-	enzymeMap := make(map[string]Enzyme)
-	commercialSupplierMap := make(map[rune]string)
+func Parse(file io.Reader) (map[string]Enzyme, error) { _ = "STUB: not implemented"; return nil, nil }
 
-	// Get rebase as a large string
-	rebase := string(fileBytes)
+// Setup some variables
 
-	// Split those strings into individual lines for parsing
-	lines := strings.Split(rebase, "\n")
+// Get rebase as a large string
 
-	commercialParsingLine := 0
-	startCommercialParsing := false
-	startReferenceParsing := false
-	for _, line := range lines {
-		// Parse commercial sources map
-		if line == "REBASE codes for commercial sources of enzymes" {
-			startCommercialParsing = true
-		}
-		// If startCommercialParsing is true, start building the commercial supplier map
-		if startCommercialParsing {
-			// if we start enzyme parsing, break the commercial supplier parsing
-			if strings.Contains(line, "<1>") {
-				commercialParsingLine = 0
-				startCommercialParsing = false
-			}
+// Split those strings into individual lines for parsing
 
-			// Skip two lines
-			commercialParsingLine++
-			if (commercialParsingLine > 3) && (len(strings.TrimLeft(line, "\t")) > 0) {
-				// Trim indentation
-				trimmedString := strings.TrimLeft(line, "\t")
+// Parse commercial sources map
 
-				// The first letter of the trimmedString is the single letter code
-				singleLetterCommercialCode := rune(trimmedString[0])
+// If startCommercialParsing is true, start building the commercial supplier map
 
-				// There are 8 spaces until the commercial companies's name. We are keeping the dates
-				// attached, since it is additional information that could be useful for users down
-				// the line
-				commercialName := trimmedString[9:]
+// if we start enzyme parsing, break the commercial supplier parsing
 
-				// Add both to commercialSupplierMap
-				commercialSupplierMap[singleLetterCommercialCode] = commercialName
-			}
-		}
+// Skip two lines
 
-		// If we are parsing references, continue appending to the current enzyme's references
-		if startReferenceParsing && line != "" {
-			// Break reference parsing if we encounter a new enzyme
-			if strings.Contains(line, "<1>") {
-				enzymeMap[enzyme.Name] = enzyme
-				enzyme = Enzyme{}
-				startReferenceParsing = false
-			}
+// Trim indentation
 
-			enzyme.References += "\n" + line
-		}
+// The first letter of the trimmedString is the single letter code
 
-		// Normal enzyme parsing
-		switch {
-		case strings.Contains(line, "<1>"):
-			enzyme.Name = line[3:]
-		case strings.Contains(line, "<2>"):
-			enzyme.Isoschizomers = strings.Split(line[3:], ",")
-		case strings.Contains(line, "<3>"):
-			enzyme.RecognitionSequence = line[3:]
-		case strings.Contains(line, "<4>"):
-			enzyme.MethylationSite = line[3:]
-		case strings.Contains(line, "<5>"):
-			enzyme.MicroOrganism = line[3:]
-		case strings.Contains(line, "<6>"):
-			enzyme.Source = line[3:]
-		case strings.Contains(line, "<7>"):
-			// We need to get a list of specific commercial suppliers from the commercialSupplierMap we previously made
-			var commercialSuppliers []string
-			for _, commercialLetter := range line[3:] {
-				commercialSuppliers = append(commercialSuppliers, commercialSupplierMap[commercialLetter])
-			}
-			enzyme.CommercialAvailability = commercialSuppliers
-		case strings.Contains(line, "<8>"):
-			enzyme.References = line[3:]
-			startReferenceParsing = true
-		}
-	}
-	return enzymeMap, err
-}
+// There are 8 spaces until the commercial companies's name. We are keeping the dates
+// attached, since it is additional information that could be useful for users down
+// the line
+
+// Add both to commercialSupplierMap
+
+// If we are parsing references, continue appending to the current enzyme's references
+
+// Break reference parsing if we encounter a new enzyme
+
+// Normal enzyme parsing
+
+// We need to get a list of specific commercial suppliers from the commercialSupplierMap we previously made
 
 // Read returns an enzymeMap from a Rebase data dump
-func Read(path string) (map[string]Enzyme, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return map[string]Enzyme{}, err
-	}
-	enzymeMap, err := parseFn(file)
-	if err != nil {
-		return map[string]Enzyme{}, err
-	}
-	return enzymeMap, nil
-}
+func Read(path string) (map[string]Enzyme, error) { _ = "STUB: not implemented"; return nil, nil }
 
 // Export returns a json file of the Rebase database
 func Export(enzymeMap map[string]Enzyme) ([]byte, error) {
-	jsonRebase, err := marshallFn(enzymeMap)
-	if err != nil {
-		return []byte{}, err
-	}
-	return jsonRebase, nil
+	_ = "STUB: not implemented"
+	return nil, nil
 }

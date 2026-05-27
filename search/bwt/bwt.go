@@ -10,15 +10,6 @@ and data compression (bzip2).
 */
 package bwt
 
-import (
-	"errors"
-	"fmt"
-	"math"
-	"strings"
-
-	"golang.org/x/exp/slices"
-)
-
 /*
 
 For the BWT usage, please read the BWT methods
@@ -233,38 +224,16 @@ type BWT struct {
 // Count represents the number of times the provided pattern
 // shows up in the original sequence.
 func (bwt BWT) Count(pattern string) (count int, err error) {
-	defer bwtRecovery("Count", &err)
-	err = isValidPattern(pattern)
-	if err != nil {
-		return 0, err
-	}
-
-	searchRange := bwt.lfSearch(pattern)
-	return searchRange.end - searchRange.start, nil
+	_ = "STUB: not implemented"
+	return 0, nil
 }
 
 // Locate returns a list of offsets at which the beginning
 // of the provided pattern occurs in the original
 // sequence.
 func (bwt BWT) Locate(pattern string) (offsets []int, err error) {
-	defer bwtRecovery("Locate", &err)
-	err = isValidPattern(pattern)
-	if err != nil {
-		return nil, err
-	}
-
-	searchRange := bwt.lfSearch(pattern)
-	if searchRange.start >= searchRange.end {
-		return nil, nil
-	}
-
-	numOfOffsets := searchRange.end - searchRange.start
-	offsets = make([]int, numOfOffsets)
-	for i := 0; i < numOfOffsets; i++ {
-		offsets[i] = bwt.suffixArray[searchRange.start+i]
-	}
-
-	return offsets, nil
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
 // Extract this allows us to extract parts of the original
@@ -273,169 +242,56 @@ func (bwt BWT) Locate(pattern string) (offsets []int, err error) {
 // end is the end of the range of text to extract exclusive.
 // If either start or end are out of bounds, Extract will panic.
 func (bwt BWT) Extract(start, end int) (extracted string, err error) {
-	defer bwtRecovery("Extract", &err)
-	err = validateRange(start, end)
-	if err != nil {
-		return "", err
-	}
-
-	if end > bwt.getLenOfOriginalStringWithNullChar()-1 {
-		return "", fmt.Errorf("end [%d] exceeds the max range of the BWT [%d]", end, bwt.getLenOfOriginalStringWithNullChar()-1)
-	}
-
-	if start < 0 {
-		return "", fmt.Errorf("start [%d] exceeds the min range of the BWT [0]", start)
-	}
-
-	strB := strings.Builder{}
-	for i := start; i < end; i++ {
-		fPos := bwt.getFCharPosFromOriginalSequenceCharPos(i)
-		skip := bwt.lookupSkipByOffset(fPos)
-		strB.WriteByte(skip.char)
-	}
-
-	return strB.String(), nil
+	_ = "STUB: not implemented"
+	return "", nil
 }
 
 // Len return the length of the sequence used to build the BWT
-func (bwt BWT) Len() int {
-	return bwt.getLenOfOriginalStringWithNullChar() - 1
-}
+func (bwt BWT) Len() int { _ = "STUB: not implemented"; return 0 }
 
 // GetTransform returns the last column of the BWT transform of the original sequence.
-func (bwt BWT) GetTransform() string {
-	lastColumn := strings.Builder{}
-	lastColumn.Grow(bwt.getLenOfOriginalStringWithNullChar())
-	for i := 0; i < bwt.runBWTCompression.length; i++ {
-		currChar := bwt.runBWTCompression.Access(i)
-		var currCharEnd int
-		if i+1 >= len(bwt.runStartPositions) {
-			currCharEnd = bwt.getLenOfOriginalStringWithNullChar()
-		} else {
-			currCharEnd = bwt.runStartPositions[i+1]
-		}
-		for lastColumn.Len() < currCharEnd {
-			lastColumn.WriteByte(currChar)
-		}
-	}
-	return lastColumn.String()
-}
+func (bwt BWT) GetTransform() string { _ = "STUB: not implemented"; return "" }
 
 //lint:ignore U1000 Ignore unused function. This is valuable for future debugging
-func (bwt BWT) getFirstColumnStr() string {
-	firstColumn := strings.Builder{}
-	firstColumn.Grow(bwt.getLenOfOriginalStringWithNullChar())
-	for i := 0; i < len(bwt.firstColumnSkipList); i++ {
-		e := bwt.firstColumnSkipList[i]
-		for j := e.openEndedInterval.start; j < e.openEndedInterval.end; j++ {
-			firstColumn.WriteByte(e.char)
-		}
-	}
-	return firstColumn.String()
-}
+func (bwt BWT) getFirstColumnStr() string { _ = "STUB: not implemented"; return "" }
 
 // getFCharPosFromOriginalSequenceCharPos looks up mapping from the original position
 // of the sequence to its corresponding position in the First Column of the BWT
 // NOTE: This clearly isn't ideal. Instead of improving this implementation, this will be replaced with
 // something like r-index in the near future.
 func (bwt BWT) getFCharPosFromOriginalSequenceCharPos(originalPos int) int {
-	for i := range bwt.suffixArray {
-		if bwt.suffixArray[i] == originalPos {
-			return i
-		}
-	}
-	panic("Unable to find the corresponding original position for a character in the original sequence in the suffix array. This should not be possible and indicates a malformed BWT.")
+	_ = "STUB: not implemented"
+	return 0
 }
 
 // lfSearch LF Search- Last First Search.
 // Finds the valid range within the BWT index where the provided pattern is possible.
 // If the final range is <= 0, then the pattern does not exist in the original sequence.
-func (bwt BWT) lfSearch(pattern string) interval {
-	searchRange := interval{start: 0, end: bwt.getLenOfOriginalStringWithNullChar()}
-	for i := 0; i < len(pattern); i++ {
-		if bwt.debug {
-			printLFDebug(bwt, searchRange, i)
-		}
-		if searchRange.end-searchRange.start <= 0 {
-			return interval{}
-		}
+func (bwt BWT) lfSearch(pattern string) interval { _ = "STUB: not implemented"; return *new(interval) }
 
-		c := pattern[len(pattern)-1-i]
-		nextStart := bwt.getNextLfSearchOffset(c, searchRange.start)
-		nextEnd := bwt.getNextLfSearchOffset(c, searchRange.end)
-		searchRange.start = nextStart
-		searchRange.end = nextEnd
-	}
-	return searchRange
-}
+func (bwt BWT) getNextLfSearchOffset(c byte, offset int) int { _ = "STUB: not implemented"; return 0 }
 
-func (bwt BWT) getNextLfSearchOffset(c byte, offset int) int {
-	nearestRunStart := bwt.runStartPositions.FindNearestRunStartPosition(offset + 1)
-	maxRunInCompressedSpace := bwt.runBWTCompression.Rank(c, nearestRunStart)
-
-	skip, ok := bwt.lookupSkipByChar(c)
-	if !ok {
-		return 0
-	}
-
-	cumulativeCounts, ok := bwt.runCumulativeCounts[string(c)]
-	if !ok {
-		return 0
-	}
-
-	cumulativeCountBeforeMaxRun := cumulativeCounts[maxRunInCompressedSpace]
-
-	currRunStart := bwt.runStartPositions.FindNearestRunStartPosition(offset)
-	currentRunChar := string(bwt.runBWTCompression.Access(currRunStart))
-	extraOffset := 0
-	// It is possible that an offset currently lies within a run of the same
-	// character we are inspecting. In this case, cumulativeCountBeforeMaxRun
-	// is not enough since the Max Run in this case does not include the run
-	// the offset is currently in. To adjust for this, we must count the number
-	// of character occurrences since the beginning of the run that the offset
-	// is currently in.
-	if c == currentRunChar[0] {
-		o := bwt.runStartPositions[nearestRunStart]
-		extraOffset += offset - o
-	}
-
-	return skip.openEndedInterval.start + cumulativeCountBeforeMaxRun + extraOffset
-}
+// It is possible that an offset currently lies within a run of the same
+// character we are inspecting. In this case, cumulativeCountBeforeMaxRun
+// is not enough since the Max Run in this case does not include the run
+// the offset is currently in. To adjust for this, we must count the number
+// of character occurrences since the beginning of the run that the offset
+// is currently in.
 
 // lookupSkipByChar looks up a skipEntry by its character in the First Column
 func (bwt BWT) lookupSkipByChar(c byte) (entry skipEntry, ok bool) {
-	for i := range bwt.firstColumnSkipList {
-		if bwt.firstColumnSkipList[i].char == c {
-			return bwt.firstColumnSkipList[i], true
-		}
-	}
-	return skipEntry{}, false
+	_ = "STUB: not implemented"
+	return *new(skipEntry), false
 }
 
 // lookupSkipByOffset looks up a skipEntry based off of an
 // offset of the Fist Column of the BWT.
 func (bwt BWT) lookupSkipByOffset(offset int) skipEntry {
-	if offset > bwt.getLenOfOriginalStringWithNullChar()-1 {
-		msg := fmt.Sprintf("offset [%d] exceeds the max bound of the BWT [%d]", offset, bwt.getLenOfOriginalStringWithNullChar()-1)
-		panic(msg)
-	}
-	if offset < 0 {
-		msg := fmt.Sprintf("offset [%d] exceeds the min bound of the BWT [0]", offset)
-		panic(msg)
-	}
-
-	for skipIndex := range bwt.firstColumnSkipList {
-		if bwt.firstColumnSkipList[skipIndex].openEndedInterval.start <= offset && offset < bwt.firstColumnSkipList[skipIndex].openEndedInterval.end {
-			return bwt.firstColumnSkipList[skipIndex]
-		}
-	}
-	msg := fmt.Sprintf("could not find the skip entry that falls within the range of the skip column at a given offset. range: [0, %d) offset: %d", bwt.getLenOfOriginalStringWithNullChar(), offset)
-	panic(msg)
+	_ = "STUB: not implemented"
+	return *new(skipEntry)
 }
 
-func (bwt BWT) getLenOfOriginalStringWithNullChar() int {
-	return bwt.firstColumnSkipList[len(bwt.firstColumnSkipList)-1].openEndedInterval.end
-}
+func (bwt BWT) getLenOfOriginalStringWithNullChar() int { _ = "STUB: not implemented"; return 0 }
 
 type interval struct {
 	start int
@@ -452,98 +308,15 @@ type skipEntry struct {
 // The provided sequence must not contain the nullChar
 // defined in this package. If it does, New will return
 // an error.
-func New(sequence string) (BWT, error) {
-	err := validateSequenceBeforeTransforming(&sequence)
-	if err != nil {
-		return BWT{}, err
-	}
-
-	sequence += nullChar
-
-	prefixArray := make([]string, len(sequence))
-	for i := 0; i < len(sequence); i++ {
-		prefixArray[i] = sequence[len(sequence)-i-1:]
-	}
-
-	sortPrefixArray(prefixArray)
-
-	suffixArray := make([]int, len(sequence))
-	charCount := 0
-	runBWTCompressionBuilder := strings.Builder{}
-	var runStartPositions runInfo
-	runCumulativeCounts := make(map[string]runInfo)
-
-	var prevChar *byte
-	for i := 0; i < len(prefixArray); i++ {
-		currChar := sequence[getBWTIndex(len(sequence), len(prefixArray[i]))]
-		if prevChar == nil {
-			prevChar = &currChar
-		}
-
-		if currChar != *prevChar {
-			runBWTCompressionBuilder.WriteByte(*prevChar)
-			runStartPositions = append(runStartPositions, i-charCount)
-			addRunCumulativeCountEntry(runCumulativeCounts, *prevChar, charCount)
-
-			charCount = 0
-			prevChar = &currChar
-		}
-
-		charCount++
-		suffixArray[i] = len(sequence) - len(prefixArray[i])
-	}
-	runBWTCompressionBuilder.WriteByte(*prevChar)
-	runStartPositions = append(runStartPositions, len(prefixArray)-charCount)
-	addRunCumulativeCountEntry(runCumulativeCounts, *prevChar, charCount)
-
-	fb := strings.Builder{}
-	for i := 0; i < len(prefixArray); i++ {
-		fb.WriteByte(prefixArray[i][0])
-	}
-
-	skipList := buildSkipList(prefixArray)
-
-	wt, err := newWaveletTreeFromString(runBWTCompressionBuilder.String())
-	if err != nil {
-		return BWT{}, err
-	}
-	return BWT{
-		firstColumnSkipList: skipList,
-		suffixArray:         suffixArray,
-		runBWTCompression:   wt,
-		runStartPositions:   runStartPositions,
-		runCumulativeCounts: runCumulativeCounts,
-	}, nil
-}
+func New(sequence string) (BWT, error) { _ = "STUB: not implemented"; return *new(BWT), nil }
 
 func addRunCumulativeCountEntry(rumCumulativeCounts map[string]runInfo, char byte, charCount int) {
-	cumulativeCountsOfChar, ok := rumCumulativeCounts[string(char)]
-	if ok {
-		cumulativeCountsOfChar = append(cumulativeCountsOfChar, charCount+cumulativeCountsOfChar[len(cumulativeCountsOfChar)-1])
-	} else {
-		cumulativeCountsOfChar = runInfo{0, charCount}
-	}
-	rumCumulativeCounts[string(char)] = cumulativeCountsOfChar
+	_ = "STUB: not implemented"
+	return
 }
 
 // buildSkipList compressed the First Column of the BWT into a skip list
-func buildSkipList(prefixArray []string) []skipEntry {
-	prevChar := prefixArray[0][0]
-	skipList := []skipEntry{{char: prevChar, openEndedInterval: interval{start: 0}}}
-	for i := 1; i < len(prefixArray); i++ {
-		currChar := prefixArray[i][0]
-		if currChar != prevChar {
-			skipList[len(skipList)-1].openEndedInterval.end = i
-			skipList = append(skipList, skipEntry{
-				char:              currChar,
-				openEndedInterval: interval{start: i},
-			})
-			prevChar = currChar
-		}
-	}
-	skipList[len(skipList)-1].openEndedInterval.end = len(prefixArray)
-	return skipList
-}
+func buildSkipList(prefixArray []string) []skipEntry { _ = "STUB: not implemented"; return nil }
 
 // getBWTIndex helps us calculate the corresponding character that would
 // be in the L column without having to rotate the full string.
@@ -553,39 +326,13 @@ func buildSkipList(prefixArray []string) []skipEntry {
 // Position:        7-4-1= 2
 // Original[3]:     n
 func getBWTIndex(lenOfSequenceBeingBuilt, lenOfSuffixArrayVisited int) int {
-	bwtCharIndex := lenOfSequenceBeingBuilt - lenOfSuffixArrayVisited - 1
-	if bwtCharIndex == -1 {
-		bwtCharIndex = lenOfSequenceBeingBuilt - 1
-	}
-	return bwtCharIndex
+	_ = "STUB: not implemented"
+	return 0
 }
 
-func sortPrefixArray(prefixArray []string) {
-	slices.SortFunc(prefixArray, func(a, b string) bool {
-		minLen := int(math.Min(float64(len(a)), float64(len(b))))
-		for i := 0; i < minLen; i++ {
-			if a[i] == b[i] {
-				continue
-			}
-			if a[i] == nullChar[0] {
-				return true
-			}
-			if b[i] == nullChar[0] {
-				return false
-			}
-			return a[i] < b[i]
-		}
+func sortPrefixArray(prefixArray []string) { _ = "STUB: not implemented"; return }
 
-		return len(a) < len(b)
-	})
-}
-
-func bwtRecovery(operation string, err *error) {
-	if r := recover(); r != nil {
-		rErr := fmt.Errorf("BWT %s InternalError=%s", operation, r)
-		*err = rErr
-	}
-}
+func bwtRecovery(operation string, err *error) { _ = "STUB: not implemented"; return }
 
 // runInfo each element of runInfo should represent an offset i where i
 // corresponds to the start of a run in a given sequence. For example,
@@ -595,51 +342,14 @@ type runInfo []int
 // FindNearestRunStartPosition given some offset, find the nearest starting position for the.
 // beginning of a run. Another way of saying this is give me the max i where runStartPositions[i] <= offset.
 // This is needed so we can understand which run an offset is a part of.
-func (r runInfo) FindNearestRunStartPosition(offset int) int {
-	start := 0
-	end := len(r) - 1
-	for start < end {
-		mid := start + (end-start)/2
-		if r[mid] < offset {
-			start = mid + 1
-			continue
-		}
-		if r[mid] > offset {
-			end = mid - 1
-			continue
-		}
+func (r runInfo) FindNearestRunStartPosition(offset int) int { _ = "STUB: not implemented"; return 0 }
 
-		return mid
-	}
+func isValidPattern(s string) (err error) { _ = "STUB: not implemented"; return nil }
 
-	if r[start] > offset {
-		return start - 1
-	}
-
-	return start
-}
-
-func isValidPattern(s string) (err error) {
-	if len(s) == 0 {
-		return errors.New("Pattern can not be empty")
-	}
-	return nil
-}
-
-func validateRange(start, end int) (err error) {
-	if start >= end {
-		return errors.New("Start must be strictly less than end")
-	}
-	return nil
-}
+func validateRange(start, end int) (err error) { _ = "STUB: not implemented"; return nil }
 
 func validateSequenceBeforeTransforming(sequence *string) (err error) {
-	if len(*sequence) == 0 {
-		return fmt.Errorf("Provided sequence must not by empty. BWT cannot be constructed")
-	}
-	if strings.Contains(*sequence, nullChar) {
-		return fmt.Errorf("Provided sequence contains the nullChar %s. BWT cannot be constructed", nullChar)
-	}
+	_ = "STUB: not implemented"
 	return nil
 }
 
@@ -676,24 +386,4 @@ func validateSequenceBeforeTransforming(sequence *string) (err error) {
 // NOTE: It can also be helpful to include the other auxiliary data structures. For example, it can be very helpful to include
 // a similar visualization for the run length compression to help debug and understand which run were used to compute the active
 // search window during each iteration.
-func printLFDebug(bwt BWT, searchRange interval, iteration int) {
-	first := bwt.getFirstColumnStr()
-	last := bwt.GetTransform()
-	lastRunCompression := bwt.runBWTCompression.reconstruct()
-
-	fullASCIIRange := strings.Builder{}
-	fullASCIIRange.Grow(searchRange.end + 1)
-	for i := 0; i < searchRange.start; i++ {
-		fullASCIIRange.WriteRune('_')
-	}
-	for i := searchRange.start; i < searchRange.end; i++ {
-		fullASCIIRange.WriteRune('^')
-	}
-	fullASCIIRange.WriteRune('X')
-
-	fmt.Println("BWT Debug Begin Iteration:", iteration)
-	fmt.Println(last)
-	fmt.Println(first)
-	fmt.Println(fullASCIIRange.String())
-	fmt.Println(lastRunCompression)
-}
+func printLFDebug(bwt BWT, searchRange interval, iteration int) { _ = "STUB: not implemented"; return }

@@ -4,16 +4,6 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
-func max[T constraints.Ordered](a, b T) T {
-	if a > b {
-		return a
-	}
-	return b
-}
+func max[T constraints.Ordered](a, b T) T { _ = "STUB: not implemented"; return *new(T) }
 
-func abs(x int) int {
-	if x < 0 {
-		return -x
-	}
-	return x
-}
+func abs(x int) int { _ = "STUB: not implemented"; return 0 }
